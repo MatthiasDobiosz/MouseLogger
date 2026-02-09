@@ -1,5 +1,6 @@
 #define WINVER 0x0600
 #define _WIN32_WINNT 0x0600
+#define INJECTED_INPUT_FLAG 0xDEADC0DE
 
 #include <windows.h>
 #include <stdio.h>
@@ -12,6 +13,7 @@ typedef struct
     LONG y;
     LONG dx;
     LONG dy;
+	int isInjected;
 } MouseLogEvent;
 
 static FILE* log_file = NULL;
@@ -84,12 +86,13 @@ void flush_buffer()
     if (!log_file || buffer_index == 0) return;
 
     for (int i = 0; i < buffer_index; i++) {
-        fprintf(log_file, "%llu,%ld,%ld,%ld,%ld\n",
+        fprintf(log_file, "%llu,%ld,%ld,%ld,%ld,%ld\n",
             buffer[i].timestamp,
             buffer[i].x,
             buffer[i].y,
             buffer[i].dx,
-            buffer[i].dy);
+            buffer[i].dy,
+            buffer[i].isInjected);
     }
 
     fflush(log_file);
@@ -126,6 +129,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             if (raw->header.dwType == RIM_TYPEMOUSE)
             {
+				int is_injected = (raw->data.mouse.ulExtraInformation == INJECTED_INPUT_FLAG) ? 1 : 0;
+                
                 LONG dx = raw->data.mouse.lLastX;
                 LONG dy = raw->data.mouse.lLastY;
 
@@ -138,12 +143,14 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     GetSystemTimeAsFileTime(&ft);
                     ULONGLONG t = (((ULONGLONG)ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
                     unsigned long long ms = t / 10000ULL;
+                    //ULONGLONG ms = (t - 116444736000000000ULL) / 10000ULL;
 
                     buffer[buffer_index].timestamp = ms;
                     buffer[buffer_index].dx = dx;
                     buffer[buffer_index].dy = dy;
                     buffer[buffer_index].x = pt.x; 
                     buffer[buffer_index].y = pt.y;
+					buffer[buffer_index].isInjected = is_injected;
                     buffer_index++;
 
                     if (buffer_index >= BUFFER_SIZE) {

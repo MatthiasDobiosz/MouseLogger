@@ -67,7 +67,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         return 1;
     }
 
-   RegisterHotKey(hwnd, 1, MOD_ALT, 'Q');
+   RegisterHotKey(hwnd, 1, MOD_ALT | MOD_CONTROL, 'Q');
 
    ShowWindow(hwnd, SW_HIDE);
 

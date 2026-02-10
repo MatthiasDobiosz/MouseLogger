@@ -50,7 +50,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     fopen_s(&log_file, "mouse_log.csv", "w");
 
     if (log_file) {
-        fprintf(log_file, "timestamp_ms,x,y,dx,dy\n");
+        fprintf(log_file, "timestamp_ms,x,y,dx,dy,is_injected\n");
         fflush(log_file);
     }
 

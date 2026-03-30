@@ -1,4 +1,4 @@
-# DelayDaemonWin
+# MouseLogger
 
 Im Rahmen der Masterarbeit entwickeltes Programm zum Loggen von Mausevents
 
